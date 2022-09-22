@@ -44,11 +44,13 @@ contract EscrowBetBonus is Ownable {
         - up to 20 people can bet on the outcomes together
         - all parties must put the same amount of funds
         - there is a window for people to place bets
+        - voter can only place one vote
      */
     function deposit(uint option) public
         checkOption(option)
         checkLimit()
         checkWindow()
+        checkVote(msg.sender)
     {
         _token.transferFrom(msg.sender,_owner, _betPrice);
         _players[_playerId].playerAddress = msg.sender;
@@ -91,6 +93,17 @@ contract EscrowBetBonus is Ownable {
     function window(bool open) public onlyOwner returns(bool){
         _window = open;
         return _window;
+    }
+
+    modifier checkVote(address voter) {
+        bool check = true;
+        for (uint256 i = 0; i < _playerId; i++) {
+            if (_players[i].playerAddress == voter) {
+                check = false;
+            }
+        }
+        require(check, "You have already voted");
+        _;
     }
 
     modifier checkWindow() {

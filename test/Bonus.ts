@@ -97,6 +97,24 @@ describe('Bonus', function () {
         escrowBetBonus.connect(players[1]).deposit(1)
       ).to.be.revertedWith('Window is closed');
     });
+
+    it('Failure 2 times deposit of player1', async function () {
+      const { escrowBetBonus, sUSDC, players } = await loadFixture(
+        deployLockFixture
+      );
+
+      await sUSDC.mint(players[1].address, ethers.utils.parseUnits('2', '20'));
+
+      await sUSDC
+        .connect(players[1])
+        .approve(escrowBetBonus.address, ethers.utils.parseUnits('2', '20'));
+
+      await escrowBetBonus.connect(players[1]).deposit(1);
+
+      await expect(
+        escrowBetBonus.connect(players[1]).deposit(1)
+      ).to.be.revertedWith('You have already voted');
+    });
   });
 
   describe('Settling of bets', function () {
